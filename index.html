@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>成就日志 · Game-Style（修复版）</title>
+<title>成就日志 · Arcade Edition（删除修复&图标升级）</title>
 <style>
-/* —— 主题 —— */
 :root{
   --bg:#0a0f1f; --bg2:#0d1226; --card:#0f142b; --card-2:#141b36;
   --text:#e8ecff; --muted:#9aa4c7; --border:#1d254a;
   --accent:#6ee7b7; --accent-2:#34d399; --danger:#f43f5e;
+  --danger-soft:#fca5a5; --btn-bg:#0a112b;
 }
 *{box-sizing:border-box} html,body{height:100%}
 body{margin:0;color:var(--text);background:radial-gradient(1200px 600px at 10% -10%,#0b1330 0%,var(--bg) 50%,#050814 100%);font:16px/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Helvetica Neue",Arial;overflow-x:hidden}
@@ -28,9 +28,13 @@ body{margin:0;color:var(--text);background:radial-gradient(1200px 600px at 10% -
 @keyframes drift{to{transform:translateY(30px)}} @keyframes twinkle{50%{opacity:.18}} @keyframes scan{to{background-position-y:8px}}
 .wrap{position:relative;z-index:1;max-width:980px;margin:40px auto;padding:0 18px}
 .panel{background:linear-gradient(180deg,var(--card) 0%,var(--card-2) 100%);border:1px solid var(--border);border-radius:18px;box-shadow:0 20px 60px #0008,inset 0 1px 0 #ffffff10;overflow:hidden}
+
+/* 头部 */
 header{display:flex;align-items:center;gap:14px;padding:16px 18px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,#0e1735 0%,#0b122b 100%)}
 .logo{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:conic-gradient(from 220deg,#22c55e,#34d399,#22c55e);box-shadow:0 6px 20px #22c55e33}
 header h1{font-size:18px;margin:0} header .muted{color:var(--muted);font-size:13px}
+
+/* 统计/等级 */
 .stats{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);background:#0c1431cc}
 .kpis{display:flex;gap:10px;flex-wrap:wrap}
 .kpi{background:#0b1230;border:1px solid var(--border);padding:8px 10px;border-radius:12px;min-width:120px}
@@ -39,19 +43,25 @@ header h1{font-size:18px;margin:0} header .muted{color:var(--muted);font-size:13
 .progress{position:relative;height:12px;background:#0a1130;border:1px solid var(--border);border-radius:999px;overflow:hidden;flex:1}
 .progress>i{position:absolute;inset:0;width:0%;background:linear-gradient(90deg,#34d399,#22c55e);box-shadow:0 0 20px #34d39966;transition:width .45s ease}
 .level .tag{background:#172042;padding:6px 10px;border:1px solid var(--border);border-radius:10px;font-weight:800}
+
+/* 输入区 */
 .composer{padding:16px 18px;display:grid;grid-template-columns:1fr 160px 140px auto;gap:10px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,#0c1536,#0b1430)}
 textarea{resize:vertical;min-height:56px;max-height:220px;background:#090f26;color:var(--text);border:1px solid var(--border);border-radius:12px;padding:12px 14px;outline:none;box-shadow:inset 0 0 0 1px #0006}
 textarea:focus{border-color:#2b356f;box-shadow:0 0 0 3px #34d39922}
 select,input[type="text"]{background:#0a112b;color:var(--text);border:1px solid var(--border);border-radius:12px;padding:12px 10px;outline:none}
 button{border:0;background:linear-gradient(180deg,#34d399,#22c55e);color:#052e16;font-weight:800;padding:12px 16px;border-radius:12px;cursor:pointer;box-shadow:0 8px 20px #22c55e33}
 button:disabled{opacity:.6;cursor:not-allowed}
-.btn-secondary{background:#0a112b;color:var(--text);border:1px solid var(--border);box-shadow:none}
+.btn-secondary{background:var(--btn-bg);color:var(--text);border:1px solid var(--border);box-shadow:none}
 .btn-danger{background:linear-gradient(180deg,#fb7185,#f43f5e);color:#fff}
+
+/* 工具条 */
 .toolbar{padding:12px 18px;display:flex;gap:10px;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:#0a1231cc}
 .toolbar .left,.toolbar .right{display:flex;gap:10px;align-items:center}
+
+/* 列表&卡片 */
 .list{padding:10px 10px 18px}
 .item{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:start;background:linear-gradient(180deg,#0b1230,#0d1536);border:1px solid var(--border);border-radius:16px;padding:12px;margin:12px;position:relative;overflow:hidden;transition:transform .18s ease,box-shadow .18s ease,background .3s ease}
-.item::after{content:"";position:absolute;inset:-1px;border-radius:16px;background:linear-gradient(90deg,transparent,#34d39922,transparent);opacity:0;transition:opacity .2s ease}
+.item::after{content:"";position:absolute;inset:-1px;border-radius:16px;background:linear-gradient(90deg,transparent,#34d39922,transparent);opacity:0;transition:opacity .2s ease;pointer-events:none;} /* 关键修复 */
 .item:hover{transform:translateY(-2px);box-shadow:0 10px 28px #0007}
 .item:hover::after{opacity:1}
 .badge{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-weight:900;font-size:14px;color:#061a12;background:conic-gradient(from 220deg,#6ee7b7,#34d399,#6ee7b7);box-shadow:0 8px 20px #22c55e33}
@@ -63,13 +73,22 @@ button:disabled{opacity:.6;cursor:not-allowed}
 .tag.rare{background:#0b1a3f;color:#b5d5ff;border-color:#1e3a8a}
 .tag.epic{background:#29114a;color:#e9d5ff;border-color:#6d28d9}
 .tag.legend{background:#3a2505;color:#ffe8b0;border-color:#b45309}
+
+/* 垃圾桶按钮（升级） */
 .actions{display:flex;gap:6px}
-.icon-btn{background:#0a112b;color:var(--text);border:1px solid var(--border);padding:8px;border-radius:12px;cursor:pointer;width:40px;height:40px;display:grid;place-items:center;transition:transform .12s ease}
-.icon-btn:hover{transform:scale(1.05)}
+.icon-btn{background:var(--btn-bg);color:var(--text);border:1px solid var(--border);padding:8px;border-radius:12px;cursor:pointer;width:42px;height:42px;display:grid;place-items:center;transition:transform .12s ease, box-shadow .12s ease, background .12s ease}
+.icon-btn.trash:hover{transform:translateY(-1px) rotate(-2deg);background:rgba(244,63,94,.08);box-shadow:0 6px 16px rgba(244,63,94,.2)}
+.icon-btn.trash svg,.icon-btn.trash svg *{pointer-events:none}
+.icon-btn.trash svg{transition:transform .15s ease, filter .15s ease}
+.icon-btn.trash:hover svg{transform:rotate(-6deg);filter:drop-shadow(0 0 8px rgba(244,63,94,.5))}
 .slide-out{animation:slide .28s ease forwards}
 @keyframes slide{to{transform:translateX(12px);opacity:0}}
+
+/* 空&脚注 */
 .empty{color:var(--muted);text-align:center;padding:32px 18px 40px}
 footer{padding:12px 16px 18px;color:var(--muted);font-size:12px;text-align:center}
+
+/* 响应式 */
 @media (max-width:720px){.composer{grid-template-columns:1fr auto auto auto}}
 @media (max-width:540px){.composer{grid-template-columns:1fr auto}#rarity,#iconInput{display:none}}
 </style>
@@ -138,28 +157,24 @@ footer{padding:12px 16px 18px;color:var(--muted);font-size:12px;text-align:cente
 
 <script>
 (function(){
-  // —— DOM 辅助 —— 
   function $(s,root){return (root||document).querySelector(s)}
   function genId(){return String(Date.now())+'-'+Math.random().toString(36).slice(2,8)}
   function clamp(n,min,max){return n<min?min:(n>max?max:n)}
 
-  // —— 选择器 —— 
   var input=$('#input'), raritySel=$('#rarity'), iconInput=$('#iconInput'),
       addBtn=$('#addBtn'), listEl=$('#list'), clearBtn=$('#clearBtn'),
       exportBtn=$('#exportBtn'), importFile=$('#importFile'), filterSel=$('#filter'),
       totalEl=$('#total'), streakEl=$('#streak'), progressBar=$('#progressBar'),
       levelTag=$('#levelTag'), confettiCanvas=$('#confetti'), soundToggle=$('#soundToggle');
 
-  // —— 存储键（含迁移）——
-  var KEY_V3='achievements.v3', KEY_V2='achievements.v2', KEY_V1='achievements.v1', KEY_SOUND='achievements.sound';
+  var KEY='achievements.v3', LEG1='achievements.v2', LEG0='achievements.v1', KEY_SOUND='achievements.sound';
 
-  // —— 状态 —— 
   var items = loadAll();
   var filter = 'all';
   var soundOn = (localStorage.getItem(KEY_SOUND)||'0') === '1';
   soundToggle.checked = soundOn;
 
-  // —— 渲染 —— 
+  /* ============ 渲染 ============ */
   function render(){
     listEl.innerHTML='';
     var show = items.filter(function(it){return filter==='all' ? true : it.rarity===filter});
@@ -172,7 +187,6 @@ footer{padding:12px 16px 18px;color:var(--muted);font-size:12px;text-align:cente
         var li=document.createElement('div'); li.className='item'; li.setAttribute('data-id',it.id);
 
         var badge=document.createElement('div'); badge.className='badge';
-        // 编号以“全量顺序”为准，非过滤后序号
         badge.textContent=String(items.indexOf(it)+1);
 
         var content=document.createElement('div'); content.className='content';
@@ -184,8 +198,11 @@ footer{padding:12px 16px 18px;color:var(--muted);font-size:12px;text-align:cente
         content.appendChild(title); content.appendChild(meta);
 
         var actions=document.createElement('div'); actions.className='actions';
-        var del=document.createElement('button'); del.className='icon-btn'; del.type='button'; del.title='删除该成就'; del.innerHTML=trashIcon();
-        (function(id,node){ del.addEventListener('click', function(){ removeItem(id,node) }) })(it.id, li);
+        var del=document.createElement('button');
+        del.className='icon-btn trash'; del.type='button';
+        del.setAttribute('data-action','del'); del.setAttribute('data-id', it.id);
+        del.setAttribute('aria-label','删除该成就');
+        del.innerHTML = trashIconUpgraded();
         actions.appendChild(del);
 
         if(it.icon){
@@ -201,16 +218,16 @@ footer{padding:12px 16px 18px;color:var(--muted);font-size:12px;text-align:cente
     updateLevel();
   }
 
-  // —— 等级 —— 
+  /* ============ 等级 ============ */
   function updateLevel(){
-    var lvl=Math.floor(items.length/5)+1; var inLevel=items.length%5; 
+    var lvl=Math.floor(items.length/5)+1; var inLevel=items.length%5;
     var pct=clamp(inLevel/5*100,0,100);
     progressBar.style.width=pct+'%';
     levelTag.textContent='Lv.'+lvl+' '+levelName(lvl);
   }
   function levelName(l){return l<3?'新手':(l<6?'冒险者':(l<9?'勇者':(l<12?'史诗猎人':'传说缔造者')))}
 
-  // —— 添加 —— 
+  /* ============ 添加 ============ */
   function add(text,rarity,icon){
     var raw = (typeof text==='string'? text : (input && input.value) || '');
     var t = raw.replace(/^\s+|\s+$/g,'');
@@ -221,62 +238,35 @@ footer{padding:12px 16px 18px;color:var(--muted);font-size:12px;text-align:cente
     if(input){ input.value=''; input.focus() } if(iconInput){ iconInput.value='' }
   }
 
-  // —— 删除 —— 
-  function removeItem(id,node){
-    var idx = -1; for(var i=0;i<items.length;i++){ if(items[i].id===id){ idx=i; break; } }
+  /* ============ 删除（事件委托） ============ */
+  function removeById(id, node){
+    var idx = -1; for(var i=0;i<items.length;i++){ if(String(items[i].id)===String(id)){ idx=i; break; } }
     if(idx===-1) return;
     try{ if(node && node.classList) node.classList.add('slide-out') }catch(e){}
     setTimeout(function(){ items.splice(idx,1); saveAll(); render() }, 200);
   }
 
-  // —— 清空 —— 
-  function clearAll(){
-    if(!items.length) return;
-    if(confirm('确定要清空全部成就吗？此操作不可撤销。')){ items=[]; saveAll(); render(); }
-  }
+  listEl.addEventListener('click', function(e){
+    var btn = e.target.closest ? e.target.closest('[data-action="del"],button.icon-btn.trash') : null;
+    if(!btn || !listEl.contains(btn)) return;
+    var id = btn.getAttribute('data-id');
+    var li = btn.closest('.item');
+    removeById(id, li);
+  }, false);
 
-  // —— 导出/导入 —— 
-  function exportJSON(){
-    try{
-      var blob=new Blob([JSON.stringify(items,null,2)],{type:'application/json;charset=utf-8'});
-      var url=URL.createObjectURL(blob); var a=document.createElement('a');
-      a.href=url; a.download='achievements-'+new Date().toISOString().slice(0,10)+'.json'; a.click(); URL.revokeObjectURL(url);
-    }catch(e){ alert('导出失败：'+e.message) }
-  }
-  function importJSON(file){
-    var reader=new FileReader();
-    reader.onload=function(e){
-      try{
-        var data=JSON.parse(String(e.target.result));
-        if(!(data && data.constructor===Array)) throw new Error('格式不正确');
-        items = data.map(function(x){
-          return { id: String(x.id||genId()), text: String(x.text||''), createdAt: Number(x.createdAt||Date.now()),
-                   rarity: validRarity(x.rarity)?x.rarity:'common', icon: String(x.icon||'') }
-        }).filter(function(x){ return x.text.replace(/^\s+|\s+$/g,'') });
-        saveAll(); render(); alert('导入完成');
-      }catch(err){ alert('导入失败：'+err.message) }
-    };
-    reader.readAsText(file,'utf-8');
-  }
-
-  // —— 过滤 —— 
-  filterSel && filterSel.addEventListener('change', function(){ filter=filterSel.value; render() });
-
-  // —— 存取（含迁移）—— 
-  function saveAll(){ try{ localStorage.setItem(KEY_V3, JSON.stringify(items)) }catch(e){} }
+  /* ============ 工具 ============ */
+  function saveAll(){ try{ localStorage.setItem(KEY, JSON.stringify(items)) }catch(e){} }
   function loadAll(){
     try{
-      var raw3=localStorage.getItem(KEY_V3); if(raw3){ var arr3=JSON.parse(raw3); if(arr3 && arr3.constructor===Array) return arr3 }
-      var raw2=localStorage.getItem(KEY_V2); if(raw2){ var arr2=JSON.parse(raw2); if(arr2 && arr2.constructor===Array){ localStorage.setItem(KEY_V3,JSON.stringify(arr2)); return arr2 } }
-      var raw1=localStorage.getItem(KEY_V1); if(raw1){ var arr1=JSON.parse(raw1); if(arr1 && arr1.constructor===Array){
-        var migrated=arr1.map(function(x){return {id:String(x.id||genId()),text:String(x.text||''),createdAt:Number(x.createdAt||Date.now()),rarity:'common',icon:''}});
-        localStorage.setItem(KEY_V3,JSON.stringify(migrated)); return migrated;
+      var raw=localStorage.getItem(KEY); if(raw){ var arr=JSON.parse(raw); if(arr && arr.constructor===Array) return arr }
+      var r2=localStorage.getItem(LEG1); if(r2){ var a2=JSON.parse(r2); if(a2 && a2.constructor===Array){ localStorage.setItem(KEY,JSON.stringify(a2)); return a2 } }
+      var r1=localStorage.getItem(LEG0); if(r1){ var a1=JSON.parse(r1); if(a1 && a1.constructor===Array){
+        var migrated=a1.map(function(x){return {id:String(x.id||genId()),text:String(x.text||''),createdAt:Number(x.createdAt||Date.now()),rarity:'common',icon:''}});
+        localStorage.setItem(KEY,JSON.stringify(migrated)); return migrated;
       } }
     }catch(e){}
     return [];
   }
-
-  // —— 工具 —— 
   function formatTime(ms){
     try{
       var d=new Date(ms);
@@ -288,9 +278,21 @@ footer{padding:12px 16px 18px;color:var(--muted);font-size:12px;text-align:cente
   function rarityLabel(r){ return r==='legend'?'传说':(r==='epic'?'史诗':(r==='rare'?'稀有':'普通')) }
   function rarityClass(r){ return r==='legend'?'legend':(r==='epic'?'epic':(r==='rare'?'rare':'')) }
   function validRarity(r){ return r==='common'||r==='rare'||r==='epic'||r==='legend' }
-  function trashIcon(){ return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 6h18M9 6v-2a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-1 0l-1 14a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2L7 6h10z" stroke="#e5e7eb" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>' }
 
-  // —— 连击（按天）—— 
+  function trashIconUpgraded(){
+    return (
+      '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" role="img">'+
+        '<path d="M9 6v-1.2A1.8 1.8 0 0 1 10.8 3h2.4A1.8 1.8 0 0 1 15 4.8V6" stroke="#fca5a5" stroke-width="1.6" stroke-linecap="round"/>'+
+        '<path d="M3 6h18" stroke="#fca5a5" stroke-width="1.6" stroke-linecap="round"/>'+
+        '<rect x="6.8" y="6.8" width="10.4" height="13.4" rx="2.2" stroke="#e5e7eb" stroke-width="1.6" fill="url(#g1)"/>'+
+        '<path d="M10 10.2v7M14 10.2v7" stroke="#f87171" stroke-width="1.6" stroke-linecap="round"/>'+
+        '<defs><linearGradient id="g1" x1="12" y1="6.8" x2="12" y2="20.2" gradientUnits="userSpaceOnUse">'+
+        '<stop stop-color="#0f172a"/><stop offset="1" stop-color="#111827"/></linearGradient></defs>'+
+      '</svg>'
+    );
+  }
+
+  /* ============ streak / confetti / 音效 ============ */
   function calcStreak(arr){
     if(!arr.length) return 0;
     var days={}; for(var i=0;i<arr.length;i++){ days[new Date(arr[i].createdAt).toDateString()]=true }
@@ -299,23 +301,19 @@ footer{padding:12px 16px 18px;color:var(--muted);font-size:12px;text-align:cente
     if(streak===0){ cursor=new Date(); cursor.setDate(cursor.getDate()-1); while(days[cursor.toDateString()]){streak++; cursor.setDate(cursor.getDate()-1)} }
     return streak;
   }
-
-  // —— 彩带（容错）—— 
   function confetti(){
     var ctx=confettiCanvas && confettiCanvas.getContext? confettiCanvas.getContext('2d'):null; if(!ctx) return;
     var W=confettiCanvas.width=window.innerWidth||document.documentElement.clientWidth||document.body.clientWidth;
     var H=confettiCanvas.height=window.innerHeight||document.documentElement.clientHeight||document.body.clientHeight;
     var N=100, parts=[]; for(var i=0;i<N;i++){ parts.push({x:Math.random()*W,y:-20-Math.random()*60,r:4+Math.random()*6,c:randColor(),v:2+Math.random()*3,w:Math.random()*2-1}) }
-    var t=0, raf; (function draw(){ t++; ctx.clearRect(0,0,W,H);
+    var t=0, raf; (function draw(){ t++; var ctx2=ctx; ctx2.clearRect(0,0,W,H);
       for(var i=0;i<parts.length;i++){ var p=parts[i]; p.y+=p.v; p.x+=p.w; p.w+= (Math.random()-.5)*.05;
-        ctx.save(); ctx.translate(p.x,p.y); ctx.rotate((t+p.x)*.02); ctx.fillStyle=p.c; ctx.fillRect(-p.r/2,-p.r/2,p.r,p.r); ctx.restore();
+        ctx2.save(); ctx2.translate(p.x,p.y); ctx2.rotate((t+p.x)*.02); ctx2.fillStyle=p.c; ctx2.fillRect(-p.r/2,-p.r/2,p.r,p.r); ctx2.restore();
       }
-      if(t<120) raf=requestAnimationFrame(draw); else { cancelAnimationFrame(raf); ctx.clearRect(0,0,W,H) }
+      if(t<120) raf=requestAnimationFrame(draw); else { cancelAnimationFrame(raf); ctx2.clearRect(0,0,W,H) }
     })();
     function randColor(){ var cols=['#34d399','#60a5fa','#f472b6','#f59e0b','#a78bfa','#fb7185','#22d3ee']; return cols[(Math.random()*cols.length)|0] }
   }
-
-  // —— 音效（默认关）——
   function blip(){
     if(!soundOn) return;
     try{
@@ -327,24 +325,51 @@ footer{padding:12px 16px 18px;color:var(--muted);font-size:12px;text-align:cente
     }catch(e){}
   }
 
-  // —— 事件绑定 —— 
+  /* ============ 事件绑定 ============ */
   addBtn && addBtn.addEventListener('click', function(){ add() });
   input && input.addEventListener('keydown', function(e){
-    var key=e.key||e.keyCode;
-    var isEnter = key==='Enter' || key===13;
-    var ctrl = e.ctrlKey || e.metaKey;
+    var key=e.key||e.keyCode; var isEnter = key==='Enter' || key===13; var ctrl = e.ctrlKey || e.metaKey;
     if(isEnter && (!e.shiftKey || ctrl)){ e.preventDefault(); add(); }
   });
-  clearBtn && clearBtn.addEventListener('click', clearAll);
-  exportBtn && exportBtn.addEventListener('click', exportJSON);
+  clearBtn && clearBtn.addEventListener('click', function(){
+    if(!items.length) return;
+    if(confirm('确定要清空全部成就吗？此操作不可撤销。')){ items=[]; saveAll(); render(); }
+  });
+  exportBtn && exportBtn.addEventListener('click', function(){
+    try{
+      var blob=new Blob([JSON.stringify(items,null,2)],{type:'application/json;charset=utf-8'});
+      var url=URL.createObjectURL(blob); var a=document.createElement('a');
+      a.href=url; a.download='achievements-'+new Date().toISOString().slice(0,10)+'.json'; a.click(); URL.revokeObjectURL(url);
+    }catch(e){ alert('导出失败：'+e.message) }
+  });
   importFile && importFile.addEventListener('change', function(e){
-    var f=(e.target.files && e.target.files[0]) || null; if(f) importJSON(f); importFile.value='';
+    var f=(e.target.files && e.target.files[0]) || null;
+    if(f){
+      var reader=new FileReader();
+      reader.onload=function(ev){
+        try{
+          var data=JSON.parse(String(ev.target.result));
+          if(!(data && data.constructor===Array)) throw new Error('格式不正确');
+          items = data.map(function(x){
+            return { id: String(x.id||genId()), text: String(x.text||''), createdAt: Number(x.createdAt||Date.now()),
+                     rarity: (x.rarity==='common'||x.rarity==='rare'||x.rarity==='epic'||x.rarity==='legend')?x.rarity:'common', icon: String(x.icon||'') }
+          }).filter(function(x){ return x.text.replace(/^\s+|\s+$/g,'') });
+          saveAll(); render(); alert('导入完成');
+        }catch(err){ alert('导入失败：'+err.message) }
+      };
+      reader.readAsText(f,'utf-8');
+    }
+    importFile.value='';
+  });
+  filterSel && filterSel.addEventListener('change', function(){
+    filter = filterSel.value || 'all';
+    render();
   });
   soundToggle && soundToggle.addEventListener('change', function(){
     soundOn = !!soundToggle.checked; try{ localStorage.setItem(KEY_SOUND, soundOn?'1':'0') }catch(e){}
   });
 
-  // —— 初始渲染 —— 
+  /* 初始渲染 */
   render();
 })();
 </script>
