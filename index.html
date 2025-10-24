@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>成就日志 · Game-Style（修复版）</title>
+<style>
+/* —— 主题 —— */
+:root{
+  --bg:#0a0f1f; --bg2:#0d1226; --card:#0f142b; --card-2:#141b36;
+  --text:#e8ecff; --muted:#9aa4c7; --border:#1d254a;
+  --accent:#6ee7b7; --accent-2:#34d399; --danger:#f43f5e;
+}
+*{box-sizing:border-box} html,body{height:100%}
+body{margin:0;color:var(--text);background:radial-gradient(1200px 600px at 10% -10%,#0b1330 0%,var(--bg) 50%,#050814 100%);font:16px/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Helvetica Neue",Arial;overflow-x:hidden}
+.stars,.twinkle,.scan{position:fixed;inset:0;pointer-events:none;z-index:0}
+.stars{background:
+ radial-gradient(1px 1px at 20% 30%,#fff8 60%,transparent 61%),
+ radial-gradient(1px 1px at 80% 20%,#fff6 60%,transparent 61%),
+ radial-gradient(1px 1px at 40% 80%,#fff5 60%,transparent 61%),
+ radial-gradient(1px 1px at 65% 60%,#fff7 60%,transparent 61%),
+ radial-gradient(1px 1px at 10% 70%,#fff6 60%,transparent 61%);opacity:.25;animation:drift 40s linear infinite}
+.twinkle{background:
+ radial-gradient(2px 2px at 30% 40%,#fff 50%,transparent 51%),
+ radial-gradient(2px 2px at 75% 70%,#fff 50%,transparent 51%),
+ radial-gradient(2px 2px at 55% 20%,#fff 50%,transparent 51%);mix-blend-mode:screen;opacity:.08;animation:twinkle 2.6s ease-in-out infinite}
+.scan{background:linear-gradient(transparent 90%,#fff2 95%,transparent);background-size:100% 8px;opacity:.06;animation:scan 12s linear infinite}
+@keyframes drift{to{transform:translateY(30px)}} @keyframes twinkle{50%{opacity:.18}} @keyframes scan{to{background-position-y:8px}}
+.wrap{position:relative;z-index:1;max-width:980px;margin:40px auto;padding:0 18px}
+.panel{background:linear-gradient(180deg,var(--card) 0%,var(--card-2) 100%);border:1px solid var(--border);border-radius:18px;box-shadow:0 20px 60px #0008,inset 0 1px 0 #ffffff10;overflow:hidden}
+header{display:flex;align-items:center;gap:14px;padding:16px 18px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,#0e1735 0%,#0b122b 100%)}
+.logo{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:conic-gradient(from 220deg,#22c55e,#34d399,#22c55e);box-shadow:0 6px 20px #22c55e33}
+header h1{font-size:18px;margin:0} header .muted{color:var(--muted);font-size:13px}
+.stats{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);background:#0c1431cc}
+.kpis{display:flex;gap:10px;flex-wrap:wrap}
+.kpi{background:#0b1230;border:1px solid var(--border);padding:8px 10px;border-radius:12px;min-width:120px}
+.kpi .label{font-size:12px;color:var(--muted)} .kpi .val{font-size:18px;font-weight:800}
+.level{display:flex;align-items:center;gap:10px;min-width:260px;flex:1}
+.progress{position:relative;height:12px;background:#0a1130;border:1px solid var(--border);border-radius:999px;overflow:hidden;flex:1}
+.progress>i{position:absolute;inset:0;width:0%;background:linear-gradient(90deg,#34d399,#22c55e);box-shadow:0 0 20px #34d39966;transition:width .45s ease}
+.level .tag{background:#172042;padding:6px 10px;border:1px solid var(--border);border-radius:10px;font-weight:800}
+.composer{padding:16px 18px;display:grid;grid-template-columns:1fr 160px 140px auto;gap:10px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,#0c1536,#0b1430)}
+textarea{resize:vertical;min-height:56px;max-height:220px;background:#090f26;color:var(--text);border:1px solid var(--border);border-radius:12px;padding:12px 14px;outline:none;box-shadow:inset 0 0 0 1px #0006}
+textarea:focus{border-color:#2b356f;box-shadow:0 0 0 3px #34d39922}
+select,input[type="text"]{background:#0a112b;color:var(--text);border:1px solid var(--border);border-radius:12px;padding:12px 10px;outline:none}
+button{border:0;background:linear-gradient(180deg,#34d399,#22c55e);color:#052e16;font-weight:800;padding:12px 16px;border-radius:12px;cursor:pointer;box-shadow:0 8px 20px #22c55e33}
+button:disabled{opacity:.6;cursor:not-allowed}
+.btn-secondary{background:#0a112b;color:var(--text);border:1px solid var(--border);box-shadow:none}
+.btn-danger{background:linear-gradient(180deg,#fb7185,#f43f5e);color:#fff}
+.toolbar{padding:12px 18px;display:flex;gap:10px;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:#0a1231cc}
+.toolbar .left,.toolbar .right{display:flex;gap:10px;align-items:center}
+.list{padding:10px 10px 18px}
+.item{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:start;background:linear-gradient(180deg,#0b1230,#0d1536);border:1px solid var(--border);border-radius:16px;padding:12px;margin:12px;position:relative;overflow:hidden;transition:transform .18s ease,box-shadow .18s ease,background .3s ease}
+.item::after{content:"";position:absolute;inset:-1px;border-radius:16px;background:linear-gradient(90deg,transparent,#34d39922,transparent);opacity:0;transition:opacity .2s ease}
+.item:hover{transform:translateY(-2px);box-shadow:0 10px 28px #0007}
+.item:hover::after{opacity:1}
+.badge{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-weight:900;font-size:14px;color:#061a12;background:conic-gradient(from 220deg,#6ee7b7,#34d399,#6ee7b7);box-shadow:0 8px 20px #22c55e33}
+.icon{position:absolute;left:8px;top:8px;transform:translate(-8px,-6px) rotate(-15deg);font-size:36px;opacity:.2;pointer-events:none}
+.content{display:flex;flex-direction:column;gap:6px}
+.title{white-space:pre-wrap;word-break:break-word;font-size:16px}
+.meta{font-size:12px;color:var(--muted);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.tag{font-size:12px;padding:2px 8px;border-radius:999px;border:1px solid var(--border);background:#111a3b;color:#bcd1ff}
+.tag.rare{background:#0b1a3f;color:#b5d5ff;border-color:#1e3a8a}
+.tag.epic{background:#29114a;color:#e9d5ff;border-color:#6d28d9}
+.tag.legend{background:#3a2505;color:#ffe8b0;border-color:#b45309}
+.actions{display:flex;gap:6px}
+.icon-btn{background:#0a112b;color:var(--text);border:1px solid var(--border);padding:8px;border-radius:12px;cursor:pointer;width:40px;height:40px;display:grid;place-items:center;transition:transform .12s ease}
+.icon-btn:hover{transform:scale(1.05)}
+.slide-out{animation:slide .28s ease forwards}
+@keyframes slide{to{transform:translateX(12px);opacity:0}}
+.empty{color:var(--muted);text-align:center;padding:32px 18px 40px}
+footer{padding:12px 16px 18px;color:var(--muted);font-size:12px;text-align:center}
+@media (max-width:720px){.composer{grid-template-columns:1fr auto auto auto}}
+@media (max-width:540px){.composer{grid-template-columns:1fr auto}#rarity,#iconInput{display:none}}
+</style>
+</head>
+<body>
+  <div class="stars"></div><div class="twinkle"></div><div class="scan"></div>
+
+  <div class="wrap">
+    <div class="panel">
+      <header>
+        <div class="logo" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2l2.3 4.6L20 8l-4 3.8.9 5.9L12 15.3 7.1 17.7 8 11.8 4 8l5.7-1.4L12 2z" fill="#0b3b2a"/><path d="M12 3.2l1.9 3.9 4.3.9-3.2 3 .7 4.6L12 13.6l-3.7 2 .7-4.6-3.2-3 4.3-.9L12 3.2z" fill="#c7f9e9"/></svg>
+        </div>
+        <h1>成就记录本 · Arcade Edition</h1>
+        <span class="muted">数据仅保存在本机浏览器</span>
+      </header>
+
+      <section class="stats">
+        <div class="kpis">
+          <div class="kpi"><div class="label">成就总数</div><div class="val" id="total">0</div></div>
+          <div class="kpi"><div class="label">连击天数</div><div class="val" id="streak">0 🔥</div></div>
+        </div>
+        <div class="level">
+          <div class="tag" id="levelTag">Lv.1 新手</div>
+          <div class="progress" aria-label="升级进度"><i id="progressBar" style="width:0%"></i></div>
+        </div>
+      </section>
+
+      <section class="composer">
+        <textarea id="input" placeholder="写下一个成就…（Enter 添加，Shift+Enter 换行，Ctrl/Cmd+Enter 也可）"></textarea>
+        <select id="rarity" title="稀有度">
+          <option value="common">普通</option><option value="rare">稀有</option>
+          <option value="epic">史诗</option><option value="legend">传说</option>
+        </select>
+        <input id="iconInput" type="text" maxlength="2" placeholder="🎯 图标(可选)" title="填一个表情作为成就图标，如 🏆 / 🎮 / ⭐">
+        <button id="addBtn" type="button" title="添加成就">+ 添加</button>
+      </section>
+
+      <div class="toolbar">
+        <div class="left">
+          <button class="btn-secondary" id="exportBtn" type="button" title="导出为 JSON">导出</button>
+          <label class="btn-secondary" for="importFile" title="从 JSON 导入">导入</label>
+          <input id="importFile" type="file" accept="application/json" hidden>
+          <select class="btn-secondary" id="filter" title="过滤">
+            <option value="all">显示：全部</option>
+            <option value="common">仅普通</option>
+            <option value="rare">仅稀有</option>
+            <option value="epic">仅史诗</option>
+            <option value="legend">仅传说</option>
+          </select>
+          <label class="btn-secondary" style="display:flex;align-items:center;gap:6px;padding:8px 10px;border-radius:12px;cursor:pointer">
+            <input id="soundToggle" type="checkbox" style="accent-color:#22c55e"> 🔊 音效
+          </label>
+        </div>
+        <div class="right">
+          <button class="btn-secondary btn-danger" id="clearBtn" type="button" title="清空全部">清空</button>
+        </div>
+      </div>
+
+      <section id="list" class="list"></section>
+      <footer>提示：点击垃圾桶可删除；添加时有彩带庆祝（默认静音，可在工具栏开启）。数据保存在 <code>localStorage</code>。</footer>
+    </div>
+  </div>
+
+  <canvas id="confetti" style="position:fixed;inset:0;pointer-events:none;z-index:2;"></canvas>
+
+<script>
+(function(){
+  // —— DOM 辅助 —— 
+  function $(s,root){return (root||document).querySelector(s)}
+  function genId(){return String(Date.now())+'-'+Math.random().toString(36).slice(2,8)}
+  function clamp(n,min,max){return n<min?min:(n>max?max:n)}
+
+  // —— 选择器 —— 
+  var input=$('#input'), raritySel=$('#rarity'), iconInput=$('#iconInput'),
+      addBtn=$('#addBtn'), listEl=$('#list'), clearBtn=$('#clearBtn'),
+      exportBtn=$('#exportBtn'), importFile=$('#importFile'), filterSel=$('#filter'),
+      totalEl=$('#total'), streakEl=$('#streak'), progressBar=$('#progressBar'),
+      levelTag=$('#levelTag'), confettiCanvas=$('#confetti'), soundToggle=$('#soundToggle');
+
+  // —— 存储键（含迁移）——
+  var KEY_V3='achievements.v3', KEY_V2='achievements.v2', KEY_V1='achievements.v1', KEY_SOUND='achievements.sound';
+
+  // —— 状态 —— 
+  var items = loadAll();
+  var filter = 'all';
+  var soundOn = (localStorage.getItem(KEY_SOUND)||'0') === '1';
+  soundToggle.checked = soundOn;
+
+  // —— 渲染 —— 
+  function render(){
+    listEl.innerHTML='';
+    var show = items.filter(function(it){return filter==='all' ? true : it.rarity===filter});
+    if(!show.length){
+      var empty=document.createElement('div'); empty.className='empty';
+      empty.textContent='还没有成就，写下第一条吧！'; listEl.appendChild(empty);
+    }else{
+      for(var i=0;i<show.length;i++){
+        var it=show[i];
+        var li=document.createElement('div'); li.className='item'; li.setAttribute('data-id',it.id);
+
+        var badge=document.createElement('div'); badge.className='badge';
+        // 编号以“全量顺序”为准，非过滤后序号
+        badge.textContent=String(items.indexOf(it)+1);
+
+        var content=document.createElement('div'); content.className='content';
+        var title=document.createElement('div'); title.className='title'; title.textContent=it.text;
+        var meta=document.createElement('div'); meta.className='meta';
+        var t=document.createElement('span'); t.textContent=formatTime(it.createdAt);
+        var r=document.createElement('span'); r.className='tag '+rarityClass(it.rarity); r.textContent=rarityLabel(it.rarity);
+        meta.appendChild(t); meta.appendChild(r);
+        content.appendChild(title); content.appendChild(meta);
+
+        var actions=document.createElement('div'); actions.className='actions';
+        var del=document.createElement('button'); del.className='icon-btn'; del.type='button'; del.title='删除该成就'; del.innerHTML=trashIcon();
+        (function(id,node){ del.addEventListener('click', function(){ removeItem(id,node) }) })(it.id, li);
+        actions.appendChild(del);
+
+        if(it.icon){
+          var icon=document.createElement('div'); icon.className='icon'; icon.textContent=it.icon; li.appendChild(icon);
+        }
+
+        li.appendChild(badge); li.appendChild(content); li.appendChild(actions);
+        listEl.appendChild(li);
+      }
+    }
+    totalEl.textContent=String(items.length);
+    streakEl.textContent = calcStreak(items)+' 🔥';
+    updateLevel();
+  }
+
+  // —— 等级 —— 
+  function updateLevel(){
+    var lvl=Math.floor(items.length/5)+1; var inLevel=items.length%5; 
+    var pct=clamp(inLevel/5*100,0,100);
+    progressBar.style.width=pct+'%';
+    levelTag.textContent='Lv.'+lvl+' '+levelName(lvl);
+  }
+  function levelName(l){return l<3?'新手':(l<6?'冒险者':(l<9?'勇者':(l<12?'史诗猎人':'传说缔造者')))}
+
+  // —— 添加 —— 
+  function add(text,rarity,icon){
+    var raw = (typeof text==='string'? text : (input && input.value) || '');
+    var t = raw.replace(/^\s+|\s+$/g,'');
+    if(!t) return;
+    var item={ id:genId(), text:t, rarity: validRarity(rarity|| (raritySel?raritySel.value:'') ) ? (rarity||raritySel.value) : 'common',
+               icon: (typeof icon==='string'?icon:(iconInput?iconInput.value:'')) || '', createdAt: Date.now() };
+    items.push(item); saveAll(); render(); try{confetti()}catch(e){} blip();
+    if(input){ input.value=''; input.focus() } if(iconInput){ iconInput.value='' }
+  }
+
+  // —— 删除 —— 
+  function removeItem(id,node){
+    var idx = -1; for(var i=0;i<items.length;i++){ if(items[i].id===id){ idx=i; break; } }
+    if(idx===-1) return;
+    try{ if(node && node.classList) node.classList.add('slide-out') }catch(e){}
+    setTimeout(function(){ items.splice(idx,1); saveAll(); render() }, 200);
+  }
+
+  // —— 清空 —— 
+  function clearAll(){
+    if(!items.length) return;
+    if(confirm('确定要清空全部成就吗？此操作不可撤销。')){ items=[]; saveAll(); render(); }
+  }
+
+  // —— 导出/导入 —— 
+  function exportJSON(){
+    try{
+      var blob=new Blob([JSON.stringify(items,null,2)],{type:'application/json;charset=utf-8'});
+      var url=URL.createObjectURL(blob); var a=document.createElement('a');
+      a.href=url; a.download='achievements-'+new Date().toISOString().slice(0,10)+'.json'; a.click(); URL.revokeObjectURL(url);
+    }catch(e){ alert('导出失败：'+e.message) }
+  }
+  function importJSON(file){
+    var reader=new FileReader();
+    reader.onload=function(e){
+      try{
+        var data=JSON.parse(String(e.target.result));
+        if(!(data && data.constructor===Array)) throw new Error('格式不正确');
+        items = data.map(function(x){
+          return { id: String(x.id||genId()), text: String(x.text||''), createdAt: Number(x.createdAt||Date.now()),
+                   rarity: validRarity(x.rarity)?x.rarity:'common', icon: String(x.icon||'') }
+        }).filter(function(x){ return x.text.replace(/^\s+|\s+$/g,'') });
+        saveAll(); render(); alert('导入完成');
+      }catch(err){ alert('导入失败：'+err.message) }
+    };
+    reader.readAsText(file,'utf-8');
+  }
+
+  // —— 过滤 —— 
+  filterSel && filterSel.addEventListener('change', function(){ filter=filterSel.value; render() });
+
+  // —— 存取（含迁移）—— 
+  function saveAll(){ try{ localStorage.setItem(KEY_V3, JSON.stringify(items)) }catch(e){} }
+  function loadAll(){
+    try{
+      var raw3=localStorage.getItem(KEY_V3); if(raw3){ var arr3=JSON.parse(raw3); if(arr3 && arr3.constructor===Array) return arr3 }
+      var raw2=localStorage.getItem(KEY_V2); if(raw2){ var arr2=JSON.parse(raw2); if(arr2 && arr2.constructor===Array){ localStorage.setItem(KEY_V3,JSON.stringify(arr2)); return arr2 } }
+      var raw1=localStorage.getItem(KEY_V1); if(raw1){ var arr1=JSON.parse(raw1); if(arr1 && arr1.constructor===Array){
+        var migrated=arr1.map(function(x){return {id:String(x.id||genId()),text:String(x.text||''),createdAt:Number(x.createdAt||Date.now()),rarity:'common',icon:''}});
+        localStorage.setItem(KEY_V3,JSON.stringify(migrated)); return migrated;
+      } }
+    }catch(e){}
+    return [];
+  }
+
+  // —— 工具 —— 
+  function formatTime(ms){
+    try{
+      var d=new Date(ms);
+      var y=d.getFullYear(), m=('0'+(d.getMonth()+1)).slice(-2), dd=('0'+d.getDate()).slice(-2);
+      var hh=('0'+d.getHours()).slice(-2), mm=('0'+d.getMinutes()).slice(-2), ss=('0'+d.getSeconds()).slice(-2);
+      return '记录时间：'+(y+'-'+m+'-'+dd+' '+hh+':'+mm+':'+ss);
+    }catch(e){ return '记录时间：'+new Date().toLocaleString() }
+  }
+  function rarityLabel(r){ return r==='legend'?'传说':(r==='epic'?'史诗':(r==='rare'?'稀有':'普通')) }
+  function rarityClass(r){ return r==='legend'?'legend':(r==='epic'?'epic':(r==='rare'?'rare':'')) }
+  function validRarity(r){ return r==='common'||r==='rare'||r==='epic'||r==='legend' }
+  function trashIcon(){ return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 6h18M9 6v-2a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-1 0l-1 14a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2L7 6h10z" stroke="#e5e7eb" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>' }
+
+  // —— 连击（按天）—— 
+  function calcStreak(arr){
+    if(!arr.length) return 0;
+    var days={}; for(var i=0;i<arr.length;i++){ days[new Date(arr[i].createdAt).toDateString()]=true }
+    var streak=0, cursor=new Date();
+    while(days[cursor.toDateString()]){ streak++; cursor.setDate(cursor.getDate()-1) }
+    if(streak===0){ cursor=new Date(); cursor.setDate(cursor.getDate()-1); while(days[cursor.toDateString()]){streak++; cursor.setDate(cursor.getDate()-1)} }
+    return streak;
+  }
+
+  // —— 彩带（容错）—— 
+  function confetti(){
+    var ctx=confettiCanvas && confettiCanvas.getContext? confettiCanvas.getContext('2d'):null; if(!ctx) return;
+    var W=confettiCanvas.width=window.innerWidth||document.documentElement.clientWidth||document.body.clientWidth;
+    var H=confettiCanvas.height=window.innerHeight||document.documentElement.clientHeight||document.body.clientHeight;
+    var N=100, parts=[]; for(var i=0;i<N;i++){ parts.push({x:Math.random()*W,y:-20-Math.random()*60,r:4+Math.random()*6,c:randColor(),v:2+Math.random()*3,w:Math.random()*2-1}) }
+    var t=0, raf; (function draw(){ t++; ctx.clearRect(0,0,W,H);
+      for(var i=0;i<parts.length;i++){ var p=parts[i]; p.y+=p.v; p.x+=p.w; p.w+= (Math.random()-.5)*.05;
+        ctx.save(); ctx.translate(p.x,p.y); ctx.rotate((t+p.x)*.02); ctx.fillStyle=p.c; ctx.fillRect(-p.r/2,-p.r/2,p.r,p.r); ctx.restore();
+      }
+      if(t<120) raf=requestAnimationFrame(draw); else { cancelAnimationFrame(raf); ctx.clearRect(0,0,W,H) }
+    })();
+    function randColor(){ var cols=['#34d399','#60a5fa','#f472b6','#f59e0b','#a78bfa','#fb7185','#22d3ee']; return cols[(Math.random()*cols.length)|0] }
+  }
+
+  // —— 音效（默认关）——
+  function blip(){
+    if(!soundOn) return;
+    try{
+      var AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
+      var ctx=new AC(), o=ctx.createOscillator(), g=ctx.createGain();
+      o.type='triangle'; o.frequency.setValueAtTime(660,ctx.currentTime); o.frequency.exponentialRampToValueAtTime(1320,ctx.currentTime+0.08);
+      g.gain.setValueAtTime(0.0001,ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.2,ctx.currentTime+0.01); g.gain.exponentialRampToValueAtTime(0.0001,ctx.currentTime+0.14);
+      o.connect(g).connect(ctx.destination); o.start(); o.stop(ctx.currentTime+0.16);
+    }catch(e){}
+  }
+
+  // —— 事件绑定 —— 
+  addBtn && addBtn.addEventListener('click', function(){ add() });
+  input && input.addEventListener('keydown', function(e){
+    var key=e.key||e.keyCode;
+    var isEnter = key==='Enter' || key===13;
+    var ctrl = e.ctrlKey || e.metaKey;
+    if(isEnter && (!e.shiftKey || ctrl)){ e.preventDefault(); add(); }
+  });
+  clearBtn && clearBtn.addEventListener('click', clearAll);
+  exportBtn && exportBtn.addEventListener('click', exportJSON);
+  importFile && importFile.addEventListener('change', function(e){
+    var f=(e.target.files && e.target.files[0]) || null; if(f) importJSON(f); importFile.value='';
+  });
+  soundToggle && soundToggle.addEventListener('change', function(){
+    soundOn = !!soundToggle.checked; try{ localStorage.setItem(KEY_SOUND, soundOn?'1':'0') }catch(e){}
+  });
+
+  // —— 初始渲染 —— 
+  render();
+})();
+</script>
+</body>
+</html>
